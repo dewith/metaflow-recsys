@@ -1,2 +1,13 @@
 metaflow
 pre-commit
+duckdb
+sagemaker
+gensim
+pyarrow
+notebook
+matplotlib
+seaborn
+scikit-learn
+tensorflow
+tensorflow-recommenders
+powerlaw
