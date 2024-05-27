@@ -1,10 +1,10 @@
 """Flow for preparing the raw dataset."""
 
 import random
-from pathlib import Path
 
 import pandas as pd
 from metaflow import FlowSpec, Parameter, step
+from utils.config import get_dataset_path
 from utils.logging import bprint
 
 
@@ -36,11 +36,11 @@ class IntermediateFlow(FlowSpec):
     # pylint: disable=import-outside-toplevel
     # pylint: disable=too-many-instance-attributes
 
-    raw_dir = Path('../data/01_raw/')
-    processed_dir = Path('../data/02_processed/')
+    raw_spotify_dir = get_dataset_path('raw_spotify')
+    master_spotify_dir = get_dataset_path('master_spotify')
 
-    make_smaller = Parameter(
-        'make_smaller',
+    subset = Parameter(
+        'subset',
         default=False,
         type=bool,
         help='Create a smaller dataset for testing purposes',
@@ -52,14 +52,14 @@ class IntermediateFlow(FlowSpec):
         bprint("🌀 Let's get started")
 
         def select_random(i):  # numpydoc ignore=PR01,RT01
-            """Select a random row if make_smaller is True."""
+            """Select a random row if subset is True."""
             return i > 0 and random.random() > 0.50
 
         bprint('Reading data', level=1)
         df_playlist = pd.read_csv(
-            self.raw_dir / 'spotify_dataset.csv',
+            self.raw_spotify_dir,
             on_bad_lines='skip',
-            skiprows=select_random if self.make_smaller else None,
+            skiprows=select_random if self.subset else None,
         )
         bprint(f'Total rows read: {len(df_playlist):,}', level=2)
 
@@ -72,10 +72,9 @@ class IntermediateFlow(FlowSpec):
         df_playlist.insert(0, 'row_id', range(0, len(df_playlist)))
 
         bprint('Dumping to parquet', level=1)
-        filename = self.processed_dir / 'spotify_master.parquet'
-        df_playlist.to_parquet(self.processed_dir / 'spotify_master.parquet')
+        df_playlist.to_parquet(self.master_spotify_dir)
         bprint(f'Total rows: {len(df_playlist):,}', level=2)
-        bprint(f'Saved at {filename.resolve()}', level=2)
+        bprint(f'Saved at {self.master_spotify_dir.resolve()}', level=2)
         self.next(self.end)
 
     @step
