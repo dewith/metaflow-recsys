@@ -1,13 +1,26 @@
+# Core Libraries
 metaflow
 pre-commit
+
+# Database
 duckdb
+
+# Machine Learning
 sagemaker
 gensim
 pyarrow
+tensorflow
+tensorflow-recommenders
+scikit-learn
+
+# Data Visualization
 notebook
 matplotlib
 seaborn
-scikit-learn
-tensorflow
-tensorflow-recommenders
+
+# Data Analysis
 powerlaw
+pandas
+
+# Code Quality
+pylint
