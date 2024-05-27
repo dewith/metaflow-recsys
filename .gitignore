@@ -153,3 +153,6 @@ Makefile
 # data
 !.gitkeep
 data/**
+
+# cache
+.ruff_cache/
