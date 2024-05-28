@@ -151,7 +151,6 @@ checklink/cookies.txt
 
 # data files
 data/*
-# !data/**/*.gitkeep
 
 # keep visualizations
 !data/06_viz
