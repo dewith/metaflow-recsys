@@ -146,13 +146,18 @@ checklink/cookies.txt
 # flow execution
 *.metaflow*
 
-# docs stuff
-Makefile
-.env/
-
-# data
-!.gitkeep
-data/**
-
-# cache
+# ruff formatter
 .ruff_cache/
+
+# data files
+data/*
+# !data/**/*.gitkeep
+
+# keep visualizations
+!data/06_viz
+data/06_viz/*
+!data/06_viz/*.png
+!data/06_viz/*.gif
+
+# keep directory structure
+!.gitkeep
