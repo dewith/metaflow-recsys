@@ -21,10 +21,10 @@ def get_palette():
         - text_darker: The color code for darker text.
         - background: The color code for the background.
     """
-    green = '#4c9878'
-    orange = '#e87e7e'
-    purple = '#b170d2'
-    blue = '#366eff'
+    green = '#66b392'
+    orange = '#f4a08f'
+    purple = '#c696de'
+    blue = '#739fd8'
     palette = [green, orange, purple, blue]
 
     text_darker = '#282828'
