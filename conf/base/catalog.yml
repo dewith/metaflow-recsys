@@ -12,3 +12,19 @@ raw_spotify:
 master_spotify:
   layer: processed
   path: spotify_master.parquet
+
+model_input_full:
+  layer: inputs
+  path: model_input_full.parquet
+
+train:
+  layer: inputs
+  path: train.parquet
+
+validation:
+  layer: inputs
+  path: validation.parquet
+
+test:
+  layer: inputs
+  path: test.parquet

@@ -1,8 +1,5 @@
 """Flow for preparing the raw dataset."""
 
-import random
-
-import pandas as pd
 from metaflow import FlowSpec, Parameter, step
 from utils.config import get_dataset_path
 from utils.logging import bprint
@@ -49,12 +46,15 @@ class IntermediateFlow(FlowSpec):
     @step
     def start(self):
         """Read the raw data, clean it and dump to parquet."""
-        bprint("🌀 Let's get started")
+        import random
 
-        def select_random(i):  # numpydoc ignore=PR01,RT01
+        import pandas as pd
+
+        def select_random(i) -> bool:  # numpydoc ignore=PR01,RT01
             """Select a random row if subset is True."""
             return i > 0 and random.random() > 0.50
 
+        bprint("🌀 Let's get started")
         bprint('Reading data', level=1)
         df_playlist = pd.read_csv(
             self.raw_spotify_dir,
