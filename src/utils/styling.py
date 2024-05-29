@@ -57,8 +57,9 @@ def apply_styling():
 
     palette, lines, text, text_lighter, text_darker, background = get_palette()
     params = {
-        'figure.figsize': (9, 6),
+        'figure.figsize': (6, 4),
         'figure.dpi': 100,
+        'savefig.pad_inches': 0.3,
         'figure.facecolor': background,
         'axes.facecolor': background,
         'axes.edgecolor': lines,
