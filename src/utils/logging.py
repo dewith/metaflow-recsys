@@ -27,8 +27,8 @@ def bprint(*args, level: int = 0, **kwargs) -> None:
     """
     prefix_map = {
         0: '',
-        1: '| ',
-        2: '|    ',
-        3: '|       ',
+        1: '|',
+        2: '|   ',
+        3: '|      ',
     }
     print(prefix_map[level], *args, **kwargs)

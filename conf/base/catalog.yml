@@ -28,3 +28,7 @@ validation:
 test:
   layer: inputs
   path: test.parquet
+
+track2vec_model:
+  layer: models
+  path: track2vec.model

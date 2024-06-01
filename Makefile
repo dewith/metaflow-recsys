@@ -8,6 +8,7 @@ env:
 
 # Activate virtual environment and install requirements
 install: env
+	. $(VENV_DIR)/bin/activate && pip install -U pip
 	. $(VENV_DIR)/bin/activate && pip install -r $(REQ_FILE)
 
 # Clean virtual environment

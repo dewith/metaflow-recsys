@@ -1,6 +1,6 @@
 """Flow for preparing the proccessed dataset to be used to train the model."""
 
-from metaflow import FlowSpec, Parameter, step
+from metaflow import FlowSpec, Parameter, current, step
 from utils.config import get_dataset_path
 from utils.logging import bprint
 
@@ -47,10 +47,10 @@ class PrimaryFlow(FlowSpec):
     validation_dir = get_dataset_path('validation')
     test_dir = get_dataset_path('test')
 
-    is_dev = Parameter(
+    IS_DEV = Parameter(
         name='dev',
         help='Flag for dev development, with a smaller dataset',
-        default=True,
+        default=False,
         type=bool,
     )
 
@@ -58,6 +58,8 @@ class PrimaryFlow(FlowSpec):
     def start(self):
         """Start the flow and print a cool message."""
         bprint("🌀 Let's get started")
+        bprint(f'Running: {current.flow_name} @ {current.run_id}')
+        bprint(f'User: {current.username}')
         self.next(self.prepare_dataset)
 
     @step
@@ -99,7 +101,7 @@ class PrimaryFlow(FlowSpec):
 
         bprint('Preparing the final dataframe', level=1)
         sampling_cmd = ''
-        if self.is_dev:
+        if self.IS_DEV:
             bprint('Subsampling data to 10%, since dev mode is enabled', level=2)
             sampling_cmd = ' USING SAMPLE 10 PERCENT (bernoulli)'
 

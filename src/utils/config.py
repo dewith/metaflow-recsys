@@ -49,17 +49,24 @@ def read_yaml(path: str) -> dict:
         return yaml.safe_load(f)
 
 
-def get_parameters() -> dict:
+def get_parameters(key: str = None) -> dict:
     """
     Read the parameters.yml file and return the contents as a dictionary.
+
+    Parameters
+    ----------
+    key : str, optional
+        The key to retrieve from the parameters.yml file. The default is None.
 
     Returns
     -------
     dict
-        The contents of the parameters.yml file as a dictionary.
+        The contents of the key in the parameters.yml ot the whole
+        parameters.yml as a dictionary.
     """
     prefix = check_cwd()
-    return read_yaml(prefix + '../conf/base/params.yml')
+    params = read_yaml(prefix + 'conf/base/params.yml')
+    return params[key] if key is not None else params
 
 
 def get_catalog() -> dict:
