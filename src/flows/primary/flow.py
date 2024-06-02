@@ -47,11 +47,19 @@ class PrimaryFlow(FlowSpec):
     validation_dir = get_dataset_path('validation')
     test_dir = get_dataset_path('test')
 
-    IS_DEV = Parameter(
+    DEV = Parameter(
         name='dev',
         help='Flag for dev development, with a smaller dataset',
         default=False,
         type=bool,
+    )
+
+    SAMPLE_RATIO = Parameter(
+        name='ratio',
+        help='Ratio of the dataset to sample',
+        default=0.1,
+        type=float,
+        required=False,
     )
 
     @step
@@ -101,9 +109,10 @@ class PrimaryFlow(FlowSpec):
 
         bprint('Preparing the final dataframe', level=1)
         sampling_cmd = ''
-        if self.IS_DEV:
-            bprint('Subsampling data to 10%, since dev mode is enabled', level=2)
-            sampling_cmd = ' USING SAMPLE 10 PERCENT (bernoulli)'
+        if self.DEV:
+            ratio = int(self.SAMPLE_RATIO * 100)
+            bprint(f'Subsampling data to {ratio}%, since dev mode is enabled', level=2)
+            sampling_cmd = f' USING SAMPLE {ratio} PERCENT (bernoulli)'
 
         dataset_query = f"""
             SELECT

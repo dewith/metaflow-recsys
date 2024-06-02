@@ -145,6 +145,7 @@ checklink/cookies.txt
 
 # flow execution
 *.metaflow*
+metaflow_card_cache/*
 
 # ruff formatter
 .ruff_cache/

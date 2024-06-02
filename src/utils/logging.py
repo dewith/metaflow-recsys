@@ -30,5 +30,6 @@ def bprint(*args, level: int = 0, **kwargs) -> None:
         1: '|',
         2: '|   ',
         3: '|      ',
+        4: '|         ',
     }
     print(prefix_map[level], *args, **kwargs)

@@ -1,7 +1,17 @@
 # Hyperparameters for the Word2Vec model
-hyperparameters:
-  min_count: 3
-  epochs: 30
-  vector_size: 48
-  window: 10
-  ns_exponent: 0.75
+hyperparameters_grid:
+  - min_count: 3
+    epochs: 30
+    vector_size: 48
+    window: 10
+    ns_exponent: 0.75
+  - min_count: 5
+    epochs: 30
+    vector_size: 48
+    window: 10
+    ns_exponent: 0.75
+  - min_count: 10
+    epochs: 30
+    vector_size: 48
+    window: 10
+    ns_exponent: 0.75

@@ -3,7 +3,8 @@
 from random import choice
 
 from gensim.models import KeyedVectors
-from metaflow import FlowSpec, Parameter, current, step
+from metaflow import FlowSpec, Parameter, card, current, step
+from metaflow.cards import Markdown, Table
 from utils.config import get_dataset_path, get_parameters
 from utils.logging import bprint
 
@@ -57,7 +58,7 @@ class ModelingFlow(FlowSpec):
     trained_model_dir = get_dataset_path('track2vec_model')
 
     # Parameters
-    hypers = get_parameters()['hyperparameters']
+    hypers_grid = get_parameters()['hyperparameters_grid']
     KNN_K = Parameter(
         name='knn_n',
         help='Number of neighbors we retrieve from the vector space.',
@@ -140,7 +141,11 @@ class ModelingFlow(FlowSpec):
         bprint("🌀 Let's get started")
         bprint(f'Running: {current.flow_name} @ {current.run_id}')
         bprint(f'User: {current.username}')
-        self.next(self.train)
+
+        # We train K models in parallel, depending how many configurations of hypers
+        # we set - we generate K set of vectors, and evaluate them on the validation
+        # set to pick the best combination of parameters!
+        self.next(self.train, foreach='hypers_grid')
 
     @step
     def train(self):
@@ -153,6 +158,7 @@ class ModelingFlow(FlowSpec):
 
         bprint('Training word2vec model', level=1)
         bprint('Hyperparameters:', level=2)
+        self.hypers = self.input
         for k, v in self.hypers.items():
             bprint(f'{k}: {v}', level=3)
         self.df_train = pd.read_parquet(self.train_dir)
@@ -174,25 +180,69 @@ class ModelingFlow(FlowSpec):
         for song, distance in test_sims:
             bprint(f'{song} ({distance:.4f})', level=3)
 
-        self.next(self.validate)
-
-    @step
-    def validate(self):
-        """
-        Evaluate the model on the validation set with the hit ratio @ K,
-        where K is the number of neighbors we retrieve from the vector space.
-        Higher hit ratio is better.
-        """
-        import pandas as pd
-
         bprint('Evaluating with validation set', level=1)
         self.df_validate = pd.read_parquet(self.validation_dir)
-
         self.validation_metric = self.evaluate_model(
             df=self.df_validate, vector_space=self.model.wv, k=self.KNN_K
         )
         bprint(f'Hit ratio @ {self.KNN_K} is {self.validation_metric:.4f}', level=2)
         self.track_vectors = self.model.wv
+        self.next(self.keep_best)
+
+    @card(type='blank', id='grid_search_card')
+    @step
+    def keep_best(self, inputs):
+        """
+        Choose the best model based on the hit ratio.
+
+        This method takes a list of input runs and selects the best model based on
+        the hit ratio. It sorts the runs in descending order of hit ratio and
+        prints the top runs along with their hyperparameters.
+
+        It also generates a table of results showing the hyperparameters
+        and hit ratio for each run.
+
+        Parameters
+        ----------
+        inputs : list
+            A list of input runs.
+        """
+        bprint('Choosing the best model', level=1)
+        self.runs = []
+        for input_run in inputs:
+            self.runs.append(
+                {
+                    'vectors': input_run.track_vectors,
+                    'hyperparameters': input_run.hypers,
+                    'hit_ratio': input_run.validation_metric,
+                }
+            )
+
+        # Pretty print the results
+        self.runs = sorted(self.runs, key=lambda x: x['hit_ratio'], reverse=True)
+        bprint('Top runs:', level=1)
+        for i, run in enumerate(self.runs):
+            bprint(f'Run {i+1} (Best!)' if i == 0 else f'Run {i+1}', level=2)
+            bprint(f'Hit ratio @ {self.KNN_K} is {run["hit_ratio"]:.4f}', level=3)
+            bprint('Hyperparameters:', level=3)
+            for k, v in run['hyperparameters'].items():
+                bprint(f'{k}: {v}', level=4)
+            if i == 2:
+                break
+
+        # Table of results
+        hypers_names = [run['hyperparameters'].keys() for run in self.runs]
+        hypers_names = list({item for sub in hypers_names for item in sub})
+        headers = [*sorted(hypers_names), f'hit_ratio@{self.KNN_K}']
+        table_data = []
+        for run in self.runs:
+            row = [run['hyperparameters'][k] for k in headers[:-1]]
+            row.append(float(run['hit_ratio']))
+            table_data.append(row)
+        current.card.append(Markdown('# Results from parallel training'))
+        current.card.append(Table(headers=headers, data=table_data))
+
+        self.final_vectors = self.runs[0]['vectors']
         self.next(self.test)
 
     @step
@@ -211,7 +261,7 @@ class ModelingFlow(FlowSpec):
         bprint('Evaluating with test set', level=1)
         self.df_test = pd.read_parquet(self.test_dir)
         self.test_metric = self.evaluate_model(
-            df=self.df_test, vector_space=self.track_vectors, k=self.KNN_K
+            df=self.df_test, vector_space=self.final_vectors, k=self.KNN_K
         )
         bprint(f'Hit ratio @ {self.KNN_K} is {self.test_metric:.4f}', level=2)
         self.next(self.end)
