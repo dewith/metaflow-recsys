@@ -237,12 +237,13 @@ class ModelingFlow(FlowSpec):
         table_data = []
         for run in self.runs:
             row = [run['hyperparameters'][k] for k in headers[:-1]]
-            row.append(float(run['hit_ratio']))
+            row.append(round(100 * float(run['hit_ratio']), 2))
             table_data.append(row)
         current.card.append(Markdown('# Results from parallel training'))
         current.card.append(Table(headers=headers, data=table_data))
 
         self.final_vectors = self.runs[0]['vectors']
+        self.final_dataset = inputs[0].df_train
         self.next(self.test)
 
     @step

@@ -24,4 +24,4 @@ duckdb
 gensim==4.3.2
 # tensorflow
 # tensorflow-recommenders
-# scikit-learn==1.1.2
+scikit-learn==1.5.0
