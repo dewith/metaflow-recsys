@@ -1,16 +1,8 @@
 """Flow for deploying the model in a sagemaker endpoint."""
 
-import os
-import tarfile
-import time
-from pathlib import Path
-
 from metaflow import S3, FlowSpec, Parameter, current, step
-from model import RetrievalModel
-from sagemaker.tensorflow import TensorFlowModel
 from utils.config import get_parameters
 from utils.logging import bprint
-from utils.meta import get_latest_successful_run
 
 
 class DeploymentFlow(FlowSpec):
@@ -75,43 +67,6 @@ class DeploymentFlow(FlowSpec):
         default=sage_defaults['role'],
     )
 
-    def build_retrieval_model(self):
-        """
-        Take the embedding space, build a Keras KNN model and store it in S3
-        so that it can be deployed by a Sagemaker endpoint.
-
-        While for simplicity this function is embedded in the deploy step,
-        you could think of spinning it out as it's own step.
-
-        Returns
-        -------
-        str
-            The path to the model tarfile.
-        """
-
-        model = RetrievalModel(self.songs_ids, self.songs_embeddings)
-        model.test()
-
-        bprint('Saving model locally', level=2)
-        # Signature for the endpointand timestamp as a convention
-        model_timestamp = int(round(time.time() * 1000))
-
-        # TF models need to have a version
-        models_dir = Path('data/04_models')
-        model_name = models_dir / f'playlist-recs-model-{model_timestamp}/1'
-        local_tar_name = models_dir / f'model-{model_timestamp}.tar.gz'
-        bprint(f'Model path: {model_name}', level=3)
-        bprint(f'Tarfile path: {local_tar_name}', level=3)
-
-        # Save the tfrs index model
-        model.save(filepath=str(model_name))
-
-        # Zip keras folder to a single tar local file
-        with tarfile.open(local_tar_name, mode='w:gz') as _tar:
-            _tar.add(model_name, recursive=True)
-
-        return local_tar_name
-
     def upload_model(self, local_tar_name: str) -> str:
         """
         Upload the model to S3 in the Sagemaker endpoint.
@@ -139,6 +94,49 @@ class DeploymentFlow(FlowSpec):
         bprint("🌀 Let's get started")
         bprint(f'Running: {current.flow_name} @ {current.run_id}')
         bprint(f'User: {current.username}')
+        self.next(self.build)
+
+    @step
+    def build(self):
+        """
+        Take the embedding space, build a Keras KNN model and store it in S3
+        so that it can be deployed by a Sagemaker endpoint.
+        """
+        import tarfile
+        import time
+        from pathlib import Path
+
+        import numpy as np
+        from model import RetrievalModel
+        from utils.meta import get_latest_successful_run
+
+        bprint('Building model', level=1)
+        latest_run = get_latest_successful_run('ModelingFlow')
+        self.final_vectors = latest_run.data.final_vectors
+        self.songs_ids = np.array(self.final_vectors.index_to_key)
+        self.songs_embeddings = np.array(
+            [self.final_vectors[idx] for idx in self.songs_ids]
+        )
+        # First build the retrieval model and test it
+        model = RetrievalModel(self.songs_ids, self.songs_embeddings)
+        model.test()
+
+        bprint('Saving model locally', level=2)
+        model_timestamp = int(round(time.time() * 1000))  # Signature for the endpoint
+        models_dir = Path('data/04_models')  # TF models need to have a version
+        model_name = models_dir / f'playlist-recs-model-{model_timestamp}/1'
+        local_tar_name = models_dir / f'model-{model_timestamp}.tar.gz'
+        bprint(f'Model path: {model_name}', level=3)
+        bprint(f'Tarfile path: {local_tar_name}', level=3)
+
+        # Save the tfrs index model
+        model.save(filepath=str(model_name))
+
+        # Zip keras folder to a single tar local file
+        with tarfile.open(local_tar_name, mode='w:gz') as _tar:
+            _tar.add(model_name, recursive=True)
+
+        self.local_tar_path = local_tar_name
         self.next(self.deploy)
 
     @step
@@ -147,24 +145,20 @@ class DeploymentFlow(FlowSpec):
         Use SageMaker to deploy the model as a stand-alone, PaaS endpoint, with o
         ur choice of the underlying Docker image and hardware capabilities.
         """
-        import numpy as np
 
         bprint('Deploying the model', level=1)
-        latest_run = get_latest_successful_run('ModelingFlow')
-        self.final_vectors = latest_run.data.final_vectors
-        self.songs_ids = np.array(self.final_vectors.index_to_key)
-        self.songs_embeddings = np.array(
-            [self.final_vectors[idx] for idx in self.songs_ids]
-        )
-        # First build the retrieval model and save it locally
-        local_tar_path = self.build_retrieval_model()
 
         if self.SAGEMAKER_DEPLOY:
+            import time
+
+            import numpy as np
+            from sagemaker.tensorflow import TensorFlowModel
+
             bprint('Deploying the model to SageMaker', level=2)
 
             # Upload the model
             bprint('Uploading model tar to S3', level=3)
-            self.model_s3_path = self.upload_model(local_tar_path)
+            self.model_s3_path = self.upload_model(self.local_tar_path)
             bprint(f'Model saved at {self.model_s3_path}', level=4)
 
             # Deploy the model
@@ -195,6 +189,8 @@ class DeploymentFlow(FlowSpec):
             bprint('Deleting endpoint now...', level=3)
             predictor.delete_endpoint()
             bprint('Endpoint deleted!', level=4)
+        else:
+            bprint('Skipping deployment to SageMaker', level=2)
 
         self.next(self.end)
 
@@ -205,5 +201,7 @@ class DeploymentFlow(FlowSpec):
 
 
 if __name__ == '__main__':
+    import os
+
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
     DeploymentFlow()
