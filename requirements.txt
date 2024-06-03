@@ -6,22 +6,21 @@ pre-commit
 pylint
 
 # Data Analysis
+duckdb
+numpy
 powerlaw
 pandas
 pyarrow
-scipy==1.11.0
 
 # Data Visualization
 notebook
 matplotlib
 seaborn
 
-# Database
-duckdb
-
 # Machine Learning
-# sagemaker
+sagemaker==2.221.1
 gensim==4.3.2
-# tensorflow
-# tensorflow-recommenders
+scipy==1.11.0
 scikit-learn==1.5.0
+tensorflow==2.12.0
+tensorflow-recommenders==0.7.2

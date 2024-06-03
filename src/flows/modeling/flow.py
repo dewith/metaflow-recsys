@@ -167,9 +167,6 @@ class ModelingFlow(FlowSpec):
         bprint('Training is completed!', level=2)
         bprint(f'Vector space size: {len(self.model.wv.index_to_key)}', level=3)
 
-        self.model.save(str(self.trained_model_dir))
-        bprint(f'Saving the trained model to {self.trained_model_dir}', level=2)
-
         bprint('Taking a glance', level=1)
         test_track = choice(list(self.model.wv.index_to_key))
         test_vector = self.model.wv[test_track]
@@ -212,6 +209,7 @@ class ModelingFlow(FlowSpec):
         for input_run in inputs:
             self.runs.append(
                 {
+                    'model': input_run.model,
                     'vectors': input_run.track_vectors,
                     'hyperparameters': input_run.hypers,
                     'hit_ratio': input_run.validation_metric,
@@ -230,7 +228,7 @@ class ModelingFlow(FlowSpec):
             if i == 2:
                 break
 
-        # Table of results
+        # Create table of results in card
         hypers_names = [run['hyperparameters'].keys() for run in self.runs]
         hypers_names = list({item for sub in hypers_names for item in sub})
         headers = [*sorted(hypers_names), f'hit_ratio@{self.KNN_K}']
@@ -242,8 +240,13 @@ class ModelingFlow(FlowSpec):
         current.card.append(Markdown('# Results from parallel training'))
         current.card.append(Table(headers=headers, data=table_data))
 
+        self.final_model = self.runs[0]['model']
         self.final_vectors = self.runs[0]['vectors']
         self.final_dataset = inputs[0].df_train
+
+        self.final_model.save(str(self.trained_model_dir))
+        bprint(f'Saved the best model at {self.trained_model_dir}', level=2)
+
         self.next(self.test)
 
     @step

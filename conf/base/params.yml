@@ -15,3 +15,8 @@ hyperparameters_grid:
     vector_size: 48
     window: 10
     ns_exponent: 0.75
+
+sagemaker:
+  image: "763104351884.dkr.ecr.us-west-2.amazonaws.com/tensorflow-inference:2.7.0-gpu-py38-cu112-ubuntu20.04-sagemaker"
+  role: "MetaSageMakerRole"
+  instance: "ml.p3.2xlarge"
