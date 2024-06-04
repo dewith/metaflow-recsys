@@ -1,5 +1,7 @@
 """Flow for deploying the model in a sagemaker endpoint."""
 
+import os
+
 from metaflow import S3, FlowSpec, Parameter, current, step
 from utils.config import get_parameters
 from utils.logging import bprint
@@ -24,15 +26,22 @@ class DeploymentFlow(FlowSpec):
 
     Methods
     -------
-    build_retrieval_model()
-        Take the embedding space, build a Keras KNN model and store it in S3
-        so that it can be deployed by a Sagemaker endpoint.
     start()
         The starting step of the flow.
+    build()
+        Step that takes the embedding space, build a Keras KNN model and store it in S3
+        so that it can be deployed by a Sagemaker endpoint.
     deploy()
-        Train the track2vec model on the train dataset.
+        Step that contructs a SageMaker's TensorFlowModel from the tar in S3 and
+        deploy it to a SageMaker endpoint.
+    test()
+        Step to check the SageMaker endpoint is working properly.
     end()
-        End the flow and print a cool message.
+        The ending step of the flow.
+    upload_model()
+        Upload the model to S3.
+    _get_flow_parameters()
+        Get the class parameters for the flow.
     """
 
     # pylint: disable=attribute-defined-outside-init
@@ -232,7 +241,5 @@ class DeploymentFlow(FlowSpec):
 
 
 if __name__ == '__main__':
-    import os
-
     os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
     DeploymentFlow()
