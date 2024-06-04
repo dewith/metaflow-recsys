@@ -20,4 +20,4 @@ hyperparameters_grid:
 sagemaker:
   image: "763104351884.dkr.ecr.us-east-1.amazonaws.com/tensorflow-inference:2.14.1-gpu-py310-cu118-ubuntu20.04-sagemaker"
   role: "SageMaker-MLOpsEngineer"
-  instance: "ml.g4dn.xlarge" #"ml.p3.2xlarge"
+  instance: "ml.g4dn.xlarge"

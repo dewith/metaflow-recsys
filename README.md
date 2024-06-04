@@ -1,10 +1,13 @@
 # 🎧 Music RecSys with Metaflow
 
-This repository contains code following the [Recommender Systems with Metaflow: Beginner](https://outerbounds.com/docs/recsys-tutorial-overview/) tutorial[^1].
+This repository contains code following the [Recommender Systems with Metaflow](https://outerbounds.com/docs/recsys-tutorial-overview/) tutorial[^1].
 
-> **Can we suggest what to listen to next when presented with a song?**
->
-> Here I learn how to use DuckDB, Gensim, Metaflow, and Keras to build an end-to-end recommender system. The model learned from existing sequences (playlists by real users) how to continue extending an arbitrary new list. More generally, this task is also known as next event prediction (NEP). The modeling technique only leverage behavioral data in the form of interactions created by users when composing their playlists.
+
+## Motivation
+
+> **Can we suggest what to listen to next after a given song?**
+
+Here I learn how to use DuckDB, Gensim, Metaflow, and Keras to build an end-to-end recommender system. The model learned from existing sequences (playlists by real users) how to continue extending an arbitrary new list. More generally, this task is also known as next event prediction (NEP). The modeling technique only leverage behavioral data in the form of interactions created by users when composing their playlists.
 
 
 
@@ -28,3 +31,21 @@ Unsurprisingly, the majority of artists have few or no songs in users playlists 
 Given this behavior, we can use the [`powerlaw`](https://github.com/jeffalstott/powerlaw) package to compare the distribution of how artists are represented in playlists to a power law density function.
 
 ![image](./data/06_viz/artists_powerlaw.png)
+
+## Model
+
+
+![image](./data/06_viz/tsne_latent_space.png)
+
+
+## Pipeline
+
+
+## Conclusion
+
+In this little project we learned to:
+
+- take a recommender system idea from prototype to real-time production;
+- leverage Metaflow to train different versions of the same model and pick the best one;
+- use Metaflow cards to save important details about model performance;
+- package a representation of your data in a keras object that you can deploy directly from the flow to a cloud endpoint with AWS Sagemaker.
