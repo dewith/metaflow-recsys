@@ -17,10 +17,11 @@ Here we learn how to use DuckDB, Gensim, Metaflow, and Keras to build an end-to-
 First, clone the repository and install all dependencies.
 
 ```bash
-$ git clone https://github.com/dewith/music-recsys.git
-$ make install
-$ make pre-commit
-$ source .env/bin/activate
+git clone https://github.com/dewith/music-recsys.git
+cd music-recsys
+make install
+make pre-commit
+source .env/bin/activate
 ```
 
 ### Dataset
@@ -36,7 +37,7 @@ Now, configure Metaflow with AWS.
 But before that, you just need to configure the [AWS CLI](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-quickstart.html) with your account.[^2].
 
 ```bash
-$ metaflow configure aws
+metaflow configure aws
 ```
 
 From there, you can just follow the Metaflow CLI instructions. Make sure that the S3 bucket you define (*actually*) exists in your AWS account.
@@ -46,10 +47,10 @@ From there, you can just follow the Metaflow CLI instructions. Make sure that th
 Finally, we can run the flows in the Metaflow project.
 
 ```bash
-$ python src/flows/intermediate/flow.py run --subset 1
-$ python src/flows/primary/flow.py run --dev 1 --ratio 0.1
-$ python src/flows/modeling/flow.py run --knn_n 100
-$ python src/flows/deployment/flow.py run --sagemaker_deploy 1
+python src/flows/intermediate/flow.py run --subset 1
+python src/flows/primary/flow.py run --dev 1 --ratio 0.1
+python src/flows/modeling/flow.py run --knn_n 100
+python src/flows/deployment/flow.py run --sagemaker_deploy 1
 ```
 
 Here I wrote the default parameters for each flow, but they are all optional since they have default values. For the **Deployment Flow**, the default SageMaker image, instance and role are set in the `conf/base/params.yml`.
