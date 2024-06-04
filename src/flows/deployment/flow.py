@@ -32,7 +32,7 @@ class DeploymentFlow(FlowSpec):
         Step that takes the embedding space, build a Keras KNN model and store it in S3
         so that it can be deployed by a Sagemaker endpoint.
     deploy()
-        Step that contructs a SageMaker's TensorFlowModel from the tar in S3 and
+        Step to construct a SageMaker's TensorFlowModel from the tar in S3 and
         deploy it to a SageMaker endpoint.
     test()
         Step to check the SageMaker endpoint is working properly.

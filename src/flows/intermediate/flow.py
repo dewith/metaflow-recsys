@@ -25,6 +25,8 @@ class IntermediateFlow(FlowSpec):
     Methods
     -------
     start()
+        The starting step of the flow.
+    clean_data()
         Read the raw data, clean up the column names, add a
         row id, and dump to parquet.
     end()

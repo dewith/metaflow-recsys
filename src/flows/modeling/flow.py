@@ -38,9 +38,9 @@ class ModelingFlow(FlowSpec):
     start()
         The starting step of the flow.
     train()
-        Train the track2vec model on the train dataset.
-    evaluate()
-        Evaluate the model on the validation dataset.
+        Train multiple track2vec model on the train dataset.
+    keep_best()
+        Choose the best model based on the hit ratio.
     test()
         Evaluate the model on the test dataset.
     end()
