@@ -168,10 +168,10 @@ class DeploymentFlow(FlowSpec):
         else:
             bprint('Skipping deployment to SageMaker', level=2)
 
-        self.next(self.test)
+        self.next(self.check)
 
     @step
-    def test(self):
+    def check(self):
         """Test the endpoint and delete it."""
         import json
         import random

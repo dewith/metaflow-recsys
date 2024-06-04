@@ -54,11 +54,11 @@ The pipeline is composed of the following flows and steps:
  3. Modeling (`src/flows/modeling/flow.py`)
     1. `train`: Train multiple track2vec model on the train dataset using a hyperparameter grid.
     2. `keep_best`: Choose the best model based on the hit ratio.
-    3. `test`: Evaluate the model on the test dataset.
+    3. `eval`: Evaluate the model on the test dataset.
  4. Deployment (`src/flows/deployment/flow.py`)
     1. `build`: Take the embedding space, build a Keras KNN model and store it in S3.
     2. `deploy`: Construct a TensorFlowModel from the tar file in S3 and deploy it to a SageMaker endpoint.
-    3. `test`: Check the SageMaker endpoint is working properly.
+    3. `check`: Check the SageMaker endpoint is working properly.
 
 Visually, the pipeline looks like this:
 

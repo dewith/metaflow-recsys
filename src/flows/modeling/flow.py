@@ -247,10 +247,10 @@ class ModelingFlow(FlowSpec):
         self.final_model.save(str(self.trained_model_dir))
         bprint(f'Saved the best model at {self.trained_model_dir}', level=2)
 
-        self.next(self.test)
+        self.next(self.eval)
 
     @step
-    def test(self):
+    def eval(self):
         """
         Test the generalization abilities of the best model by running
         predictions on the unseen test data.
