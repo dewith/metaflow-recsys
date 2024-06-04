@@ -16,7 +16,8 @@ hyperparameters_grid:
     window: 10
     ns_exponent: 0.75
 
+# Images: https://github.com/aws/deep-learning-containers/blob/master/available_images.md
 sagemaker:
-  image: "763104351884.dkr.ecr.us-west-2.amazonaws.com/tensorflow-inference:2.7.0-gpu-py38-cu112-ubuntu20.04-sagemaker"
-  role: "MetaSageMakerRole"
-  instance: "ml.p3.2xlarge"
+  image: "763104351884.dkr.ecr.us-east-1.amazonaws.com/tensorflow-inference:2.14.1-gpu-py310-cu118-ubuntu20.04-sagemaker"
+  role: "SageMaker-MLOpsEngineer"
+  instance: "ml.g4dn.xlarge" #"ml.p3.2xlarge"

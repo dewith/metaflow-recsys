@@ -1,11 +1,11 @@
 """This module contains utility functions for logging."""
 
-PREFIX_MAP = {
+INDENT_MAP = {
     0: '',
     1: '|',
 }
 for i, lvl in enumerate(range(2, 10), 1):
-    PREFIX_MAP[lvl] = '|' + '   ' * i
+    INDENT_MAP[lvl] = '|' + (' ' * 3 * i)
 
 
 def bprint(*args, level: int = 0, prefix: str = '', **kwargs) -> None:
@@ -34,7 +34,14 @@ def bprint(*args, level: int = 0, prefix: str = '', **kwargs) -> None:
     >>> bprint("Hello, world!", level=1)
     | Hello, world!
     """
-    full_prefix = PREFIX_MAP[level]
-    if prefix:
-        full_prefix = ''.join([full_prefix[: -len(prefix)], prefix])
-    print(full_prefix, *args, **kwargs)
+    indent = INDENT_MAP[level]
+    indent_0 = indent if not prefix else indent[: -len(prefix)] + prefix
+
+    sep = kwargs.get('sep', ' ')
+    text = sep.join(map(str, args))
+    for line, subtext in enumerate(text.splitlines()):
+        print(indent if line else indent_0, subtext, **kwargs)
+
+
+if __name__ == '__main__':
+    bprint('Hola, \nmuchacho !', level=4, prefix='¡')  # Debug
